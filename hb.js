@@ -1,143 +1,144 @@
 'use strict'
 
-const PI2 = Math.PI * 2
-let random = (min, max) => Math.random() * (max - min + 1) + min | 0
+window.human = false;
 
-class Birthday {
-  constructor() {
-    this.resize()
+var canvasEl = document.querySelector('.fireworks');
+var ctx = canvasEl.getContext('2d');
+var numberOfParticules = 30;
+var pointerX = 0;
+var pointerY = 0;
+var tap = ('ontouchstart' in window || navigator.msMaxTouchPoints) ? 'touchstart' : 'mousedown';
+var colors = ['#FF1461', '#18FF92', '#5A87FF', '#FBF38C'];
 
-    // create a lovely place to store the firework
-    this.fireworks = []
-    this.counter = 0
+function setCanvasSize() {
+  canvasEl.width = window.innerWidth * 2;
+  canvasEl.height = window.innerHeight * 2;
+  canvasEl.style.width = window.innerWidth + 'px';
+  canvasEl.style.height = window.innerHeight + 'px';
+  canvasEl.getContext('2d').scale(2, 2);
+}
 
-  }
-  resize() {
-    this.width = canvas.width = window.innerWidth
-    let center = this.width / 2 | 0
-    this.spawnA = center - center / 4 | 0
-    this.spawnB = center + center / 4 | 0
-    
-    this.height = canvas.height = window.innerHeight
-    this.spawnC = this.height * .1
-    this.spawnD = this.height * .5
-    
-  }
-  onClick(evt) {
-     let x = evt.clientX || evt.touches && evt.touches[0].pageX
-     let y = evt.clientY || evt.touches && evt.touches[0].pageY
-     
-     let count = random(3,5)
-     for(let i = 0; i < count; i++) this.fireworks.push(new Firework(
-        random(this.spawnA, this.spawnB),
-        this.height,
-        x,
-        y,
-        random(300, 450),
-        random(30, 110)))
-          
-     this.counter = -30
-     
-  }
-  update() {
-    ctx.globalCompositeOperation = 'hard-light'
-    ctx.fillStyle = 'rgba(20,20,20,0.15)'
-    ctx.fillRect(0, 0, this.width, this.height)
+function updateCoords(e) {
+  pointerX = e.clientX || e.touches[0].clientX;
+  pointerY = e.clientY || e.touches[0].clientY;
+}
 
-    ctx.globalCompositeOperation = 'lighter'
-    for (let firework of this.fireworks) firework.update()
-
-    // if enough time passed... create new new firework
-    if (++this.counter === 15) {
-      this.fireworks.push(new Firework(
-        random(this.spawnA, this.spawnB),
-        this.height,
-        random(0, this.width),
-        random(this.spawnC, this.spawnD),
-        random(300, 450),
-        random(30, 110)))
-      this.counter = 0
-    }
-
-    // remove the dead fireworks
-    if (this.fireworks.length > 1000) this.fireworks = this.fireworks.filter(firework => !firework.dead)
-
+function setParticuleDirection(p) {
+  var angle = anime.random(0, 360) * Math.PI / 180;
+  var value = anime.random(50, 180);
+  var radius = [-1, 1][anime.random(0, 1)] * value;
+  return {
+    x: p.x + radius * Math.cos(angle),
+    y: p.y + radius * Math.sin(angle)
   }
 }
 
-class Firework {
-  constructor(x, y, targetX, targetY, shade, offsprings) {
-    this.dead = false
-    this.offsprings = offsprings
-
-    this.x = x
-    this.y = y
-    this.targetX = targetX
-    this.targetY = targetY
-
-    this.shade = shade
-    this.history = []
+function createParticule(x,y) {
+  var p = {};
+  p.x = x;
+  p.y = y;
+  p.color = colors[anime.random(0, colors.length - 1)];
+  p.radius = anime.random(16, 32);
+  p.endPos = setParticuleDirection(p);
+  p.draw = function() {
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, p.radius, 0, 2 * Math.PI, true);
+    ctx.fillStyle = p.color;
+    ctx.fill();
   }
-  update() {
-    if (this.dead) return;
+  return p;
+}
 
-    let xDiff = this.targetX - this.x
-    let yDiff = this.targetY - this.y
-    if (Math.abs(xDiff) > 3 || Math.abs(yDiff) > 3) { // is still moving
-      this.x += xDiff / 20
-      this.y += yDiff / 20
+function createCircle(x,y) {
+  var p = {};
+  p.x = x;
+  p.y = y;
+  p.color = '#FFF';
+  p.radius = 0.1;
+  p.alpha = .5;
+  p.lineWidth = 6;
+  p.draw = function() {
+    ctx.globalAlpha = p.alpha;
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, p.radius, 0, 2 * Math.PI, true);
+    ctx.lineWidth = p.lineWidth;
+    ctx.strokeStyle = p.color;
+    ctx.stroke();
+    ctx.globalAlpha = 1;
+  }
+  return p;
+}
 
-      this.history.push({
-        x: this.x,
-        y: this.y
-      })
-
-      if (this.history.length > 20) this.history.shift()
-
-    } else {
-      if (this.offsprings && !this.madeChilds) {
-        
-        let babies = this.offsprings / 2;
-        for (let i = 0; i < babies; i++) {
-          let targetX = this.x + this.offsprings * Math.cos(PI2 * i / babies) | 0
-          let targetY = this.y + this.offsprings * Math.sin(PI2 * i / babies) | 0
-
-          birthday.fireworks.push(new Firework(this.x, this.y, targetX, targetY, this.shade, 0))
-
-        }
-
-      }
-      this.madeChilds = true
-      this.history.shift()
-    }
-    
-    if (this.history.length === 0) this.dead = true
-    else if (this.offsprings) for (let i = 0; this.history.length > i; i++) {
-        let point = this.history[i]
-        ctx.beginPath()
-        ctx.fillStyle = 'hsl(' + this.shade + ',100%,' + i + '%)'
-        ctx.arc(point.x, point.y, 1, 0, PI2, false)
-        ctx.fill()
-      } else {
-      ctx.beginPath()
-      ctx.fillStyle = 'hsl(' + this.shade + ',100%,50%)'
-      ctx.arc(this.x, this.y, 1, 0, PI2, false)
-      ctx.fill()
-    }
-
+function renderParticule(anim) {
+  for (var i = 0; i < anim.animatables.length; i++) {
+    anim.animatables[i].target.draw();
   }
 }
 
-let canvas = document.getElementById('birthday')
-let ctx = canvas.getContext('2d')
+function animateParticules(x, y) {
+  var circle = createCircle(x, y);
+  var particules = [];
+  for (var i = 0; i < numberOfParticules; i++) {
+    particules.push(createParticule(x, y));
+  }
+  anime.timeline().add({
+    targets: particules,
+    x: function(p) { return p.endPos.x; },
+    y: function(p) { return p.endPos.y; },
+    radius: 0.1,
+    duration: anime.random(1200, 1800),
+    easing: 'easeOutExpo',
+    update: renderParticule
+  })
+    .add({
+    targets: circle,
+    radius: anime.random(80, 160),
+    lineWidth: 0,
+    alpha: {
+      value: 0,
+      easing: 'linear',
+      duration: anime.random(600, 800),
+    },
+    duration: anime.random(1200, 1800),
+    easing: 'easeOutExpo',
+    update: renderParticule,
+    offset: 0
+  });
+}
 
-let birthday = new Birthday
-window.onresize = () => birthday.resize()
-document.onclick = evt => birthday.onClick(evt)
-document.ontouchstart = evt => birthday.onClick(evt)
+var render = anime({
+  duration: Infinity,
+  update: function() {
+    ctx.clearRect(0, 0, canvasEl.width, canvasEl.height);
+  }
+});
 
-;(function update() {
-  requestAnimationFrame(update)
-  birthday.update()
+document.addEventListener(tap, function(e) {
+  window.human = true;
+  render.play();
+  updateCoords(e);
+  animateParticules(pointerX, pointerY);
+}, false);
 
-}())
+var centerX = window.innerWidth / 2;
+var centerY = window.innerHeight / 2;
+
+function getRandomInt(min, max) {
+  min = Math.ceil(min);
+  max = Math.floor(max);
+  return Math.floor(Math.random() * (max - min)) + min;
+}
+
+function autoClick() {
+  //if (window.human) return;
+  const random = getRandomInt(-210, 160)
+  animateParticules(
+    anime.random(centerX - random, centerX + random),
+    anime.random(centerY - 150, centerY - 150)
+  );
+  anime({duration: 800}).finished.then(autoClick);
+}
+
+autoClick();
+setCanvasSize();
+window.addEventListener('resize', setCanvasSize, false);

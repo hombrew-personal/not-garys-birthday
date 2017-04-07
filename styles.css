@@ -1,18 +1,229 @@
 body {
-  margin: 0;
-  background: #020202;
+  background: #F3D8C7;
+  position: relative;
+  overflow: hidden;
   cursor: crosshair;
+  font-family: 'Open Sans', sans-serif;
 }
-canvas{display:block}
-h1 {
+
+.container,
+.one,
+.two,
+.candle,
+.face,
+.drip, .blush {
   position: absolute;
-  top: 20%;
+}
+
+.container {
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  margin: auto;
+  width: 200px;
+  height: 300px;
+}
+
+.birthday {
+  position: absolute;
+  bottom: -80px;
+  width: 260px;
   left: 50%;
-  transform: translate(-50%, -50%);
-  color: #fff;
-  font-family: "Source Sans Pro";
-  font-size: 5em;
-  font-weight: 900;
-  -webkit-user-select: none;
-  user-select: none;
+  color: #754f44;
+  transform: translateX(-40%);
+}
+.red {
+  color: red;
+}
+
+h1, h2 {
+  margin-top: 0.2rem ;
+  margin-bottom: 1rem;
+}
+
+.birthday h1,.birthday h2, .birthday p {
+  text-align: center;
+  width: 100%;
+}
+
+.one {
+  left: 70px;
+  z-index: 1;
+  width: 0;
+  border-top: 250px solid #fcffcf;
+  border-left: 70px solid transparent;
+  border-right: 70px solid transparent;
+  transform: rotateX(80deg) rotateZ(-75deg);
+}
+
+.two {
+  z-index: 0;
+  top: 130px;
+  left: 0;
+  content: '';
+  width: 259px;
+  height: 80px;
+  background: #f9ff9e; //#fbffb9;
+  border-radius: 3px;
+  box-shadow: 0 20px 0 0 #754F44;
+}
+
+.candle {
+  z-index: 3;
+  top: 50px;
+  left: 50px;
+  width: 8px;
+  height: 70px;
+  background-color: #F2A594;
+  background: repeating-linear-gradient(45deg, #cdcdcd, whitesmoke 1px, #F2A594 2px, #F2A594 8px);
+}
+.candle:before, .candle:after {
+  position: absolute;
+  content: '';
+}
+.candle:before {
+  top: -20px;
+  left: -4px;
+  width: 15px;
+  height: 15px;
+  background: #FFF;
+  border-radius: 0 100px 60px 100px;
+  transform: rotate(40deg);
+  animation: 0.3s light infinite ease;
+}
+.candle:after {
+  width: 33px;
+  height: 5px;
+  background: #000;
+  opacity: 0.2;
+  top: 66px;
+  left: -32px;
+  border-radius: 15px 5px 5px 0;
+  transform: rotate(-5deg);
+}
+
+@keyframes light {
+  0% {
+    transform: rotate(45deg);
+  }
+  50% {
+    transform: rotate(40deg);
+  }
+  75% {
+    transform: rotate(45deg);
+  }
+  100% {
+    transform: rotate(48deg);
+  }
+}
+.face {
+  top: 35px;
+  left: 100px;
+  width: 10px;
+  height: 10px;
+  background: #444;
+  border-radius: 100%;
+}
+.face:before, .face:after {
+  position: absolute;
+  content: '';
+}
+.face:before {
+  left: 46px;
+  width: 10px;
+  height: 10px;
+  background: #444;
+  border-radius: 100%;
+  animation: wink 2s ease-out infinite;
+/*  -webkit-animation-delay: 3s;  Chrome, Safari, Opera
+  animation-delay: 3s;*/
+}
+
+
+
+
+.face:after {
+  top: 2px;
+  left: 20px;
+  width: 10px;
+  height: 10px;
+  border: 4px solid;
+  border-radius: 100%;
+  border-color: transparent transparent #444 #444;
+  transform: rotate(-40deg);
+  animation: mouthStuff 2s ease;
+}
+
+.drip {
+  z-index: 100;
+  top: 50px;
+  left: 47px;
+  width: 6px;
+  height: 6px;
+  background: #F2A594;
+  border-radius: 0 100px 100px 100px;
+  transform: rotate(55deg);
+  animation: 6s drippin infinite ease;
+}
+
+@keyframes wink {
+  0%{
+    transform: scaleY(1)
+  }
+  89%{
+    transform: scaleY(1);
+  }
+  90% {
+    transform: scaleY(0.1);
+  }
+}
+
+@keyframes drippin {
+  100% {
+    transform: translateY(50px);
+  }
+}
+.blush {
+  top: 178px;
+  left: 90px;
+  width: 10px;
+  height: 6px;
+  border-radius: 100%;
+  background: #EF5686;
+  opacity: 0.5;
+  animation: fade 2.4s ease-out infinite;
+}
+
+.blush:before {
+  position: absolute;
+  content: '';
+  left: 69px;
+  width: 10px;
+  height: 6px;
+  border-radius: 100%;
+  background: #EF5686;
+  animation: fade 2.4s ease-out infinite;
+}
+
+@keyframes fade {
+  0% {
+    background: #EF5686;
+  }
+
+  70% {
+    background: #fd0050;
+  }
+}
+
+@keyframes mouthStuff {
+  30% {
+    transform: rotateZ(-65deg)
+  }
+  50%{
+    transform: rotateZ(-25deg)
+  }
+  70%, 0%, 100%{
+    transform: rotateZ(-40deg)
+  }
 }
